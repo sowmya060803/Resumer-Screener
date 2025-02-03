@@ -1,0 +1,35 @@
+import spacy
+import openai
+from typing import Dict, Any
+
+# Load spaCy model
+nlp = spacy.load("en_core_web_sm")
+
+# Set up OpenAI API key
+openai.api_key = "your-openai-api-key"  # Replace with your actual API key
+
+def process_resume(resume_text: str) -> Dict[str, Any]:
+    # Perform Named Entity Recognition using spaCy
+    doc = nlp(resume_text)
+    entities = {ent.label_: ent.text for ent in doc.ents}
+
+    # Perform text classification using OpenAI GPT
+    response = openai.Completion.create(
+        engine="text-davinci-002",
+        prompt=f"Classify the following resume:\n\n{resume_text}\n\nClassification:",
+        max_tokens=1,
+        n=1,
+        stop=None,
+        temperature=0.5,
+    )
+    classification = response.choices[0].text.strip()
+
+    # Calculate a simple score (this is a placeholder - you'd want to implement a more sophisticated scoring system)
+    score = len(entities) / 10  # Simple score based on number of entities found
+
+    return {
+        "entities": entities,
+        "classification": classification,
+        "score": score
+    }
+
